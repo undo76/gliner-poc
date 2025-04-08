@@ -1,0 +1,37 @@
+{
+  "examples": [
+    {
+      "id": 1,
+      "text": "Cristiano Ronaldo dos Santos Aveiro was born on 5 February 1985 in Portugal. He plays for Al Nassr and the Portugal national team. Ronaldo has won five Ballon d'Or awards and three UEFA Men's Player of the Year Awards.",
+      "description": "Sports personality"
+    },
+    {
+      "id": 2,
+      "text": "Apple Inc. was founded by Steve Jobs, Steve Wozniak, and Ronald Wayne on April 1, 1976. The company is headquartered in Cupertino, California and is known for products like the iPhone, MacBook, and iPad.",
+      "description": "Technology company"
+    },
+    {
+      "id": 3,
+      "text": "The Eiffel Tower was completed on March 31, 1889 in Paris, France. It was designed by Gustave Eiffel and is visited by around 7 million people every year.",
+      "description": "Historical landmark"
+    },
+    {
+      "id": 4,
+      "text": "The World Health Organization (WHO) declared COVID-19 a pandemic on March 11, 2020. The virus was first identified in Wuhan, China in December 2019.",
+      "description": "Health event"
+    },
+    {
+      "id": 5,
+      "text": "Amazon.com was founded by Jeff Bezos on July 5, 1994. The company started as an online bookstore but has expanded to sell almost everything. Its headquarters are in Seattle, Washington.",
+      "description": "E-commerce company"
+    }
+  ],
+  "entity_types": [
+    "person",
+    "organization",
+    "location",
+    "date",
+    "product",
+    "event"
+  ]
+}
