@@ -6,6 +6,7 @@ import json
 import re
 from collections import defaultdict
 import random
+import warnings
 
 from gliner import GLiNER
 from rich.console import Console
@@ -203,6 +204,10 @@ def main():
 
     # Load the multilingual model
     print("Loading GLiNER model...")
+    
+    # Suppress specific warning about sentencepiece tokenizer
+    warnings.filterwarnings("ignore", message="The sentencepiece tokenizer.*")
+    
     model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1", max_length=512)
 
     # Load examples from JSON file
