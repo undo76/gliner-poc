@@ -4,8 +4,11 @@
 from gliner import GLiNER
 
 def main():
-    # Load the multilingual model
-    model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
+    # Load the multilingual model with specific configuration to avoid warnings
+    model = GLiNER.from_pretrained(
+        "urchade/gliner_multi-v2.1",
+        model_max_length=512  # Set a maximum length to avoid truncation warning
+    )
     
     # Sample text for demonstration
     text = """
