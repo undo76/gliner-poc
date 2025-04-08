@@ -14,6 +14,50 @@ def load_examples(file_path):
     return data["examples"], data["entity_types"]
 
 
+def process_long_text(model, text, entity_types, chunk_size=512, overlap=100):
+    """Process a long text by splitting it into overlapping chunks."""
+    # For shorter texts, process directly
+    if len(text) <= chunk_size:
+        return model.predict_entities(text, entity_types)
+    
+    # Split text into chunks with overlap
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = min(start + chunk_size, len(text))
+        chunks.append(text[start:end])
+        start = end - overlap if end < len(text) else end
+    
+    # Process each chunk
+    all_entities = []
+    for i, chunk in enumerate(chunks):
+        print(f"Processing chunk {i+1}/{len(chunks)}...")
+        chunk_entities = model.predict_entities(chunk, entity_types)
+        
+        # Adjust entity positions for chunks after the first one
+        if i > 0:
+            offset = chunks[i-1].rfind(" ", 0, len(chunks[i-1]) - overlap)
+            if offset == -1:
+                offset = len(chunks[i-1]) - overlap
+            
+            # Only add entities that aren't duplicates from the overlap
+            for entity in chunk_entities:
+                # Check if this entity is a duplicate from the previous chunk's overlap
+                is_duplicate = False
+                for prev_entity in all_entities:
+                    if (entity['text'] == prev_entity['text'] and 
+                        entity['label'] == prev_entity['label']):
+                        is_duplicate = True
+                        break
+                
+                if not is_duplicate:
+                    all_entities.append(entity)
+        else:
+            all_entities.extend(chunk_entities)
+    
+    return all_entities
+
+
 def process_example(model, example, entity_types):
     """Process a single example and extract entities."""
     print(f"\n--- Example {example['id']}: {example['description']} ---")
@@ -23,8 +67,8 @@ def process_example(model, example, entity_types):
         else f"Text: {example['text']}"
     )
 
-    # Get predictions
-    entities = model.predict_entities(example["text"], entity_types)
+    # Get predictions, handling long texts appropriately
+    entities = process_long_text(model, example["text"], entity_types)
 
     # Display results
     print("Extracted entities:")
@@ -45,12 +89,10 @@ def main():
     )
     args = parser.parse_args()
 
-    # Load the multilingual model with specific configuration to avoid warnings
+    # Load the multilingual model
     print("Loading GLiNER model...")
-    # Don't limit the max length AI!
     model = GLiNER.from_pretrained(
-        "urchade/gliner_multi-v2.1",
-        model_max_length=512,  # Set a maximum length to avoid truncation warning
+        "urchade/gliner_multi-v2.1"
     )
 
     # Load examples from JSON file
