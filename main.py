@@ -71,71 +71,79 @@ def highlight_entities_in_text(text, entities):
     """Highlight entities in text using Rich library."""
     # Available rich styles for highlighting
     styles = [
-        "bold red", "bold blue", "bold green", "bold yellow", 
-        "bold magenta", "bold cyan", "bold purple", "bold white on red",
-        "bold white on blue", "bold white on green", "bold white on magenta"
+        "bold red",
+        "bold blue",
+        "bold green",
+        "bold yellow",
+        "bold magenta",
+        "bold cyan",
+        "bold purple",
+        "bold white on red",
+        "bold white on blue",
+        "bold white on green",
+        "bold white on magenta",
     ]
-    
+
     # Create a console for rich output
     console = Console()
-    
+
     # Create a mapping of entity types to styles
     entity_types = set(entity["label"] for entity in entities)
     entity_styles = {}
-    
+
     # Assign a random style to each entity type
     for entity_type in entity_types:
         # Use modulo to cycle through styles if we have more entity types than styles
         entity_styles[entity_type] = styles[len(entity_styles) % len(styles)]
-    
+
     # Sort entities by their position in the text (to handle overlapping entities)
     positions = defaultdict(list)
-    
+
     # Find all occurrences of each entity in the text
     for entity in entities:
         entity_text = entity["text"]
         entity_type = entity["label"]
-        
+
         # Find all occurrences of this entity in the text
         for match in re.finditer(re.escape(entity_text), text):
             start, end = match.span()
             positions[start].append((end, entity_text, entity_type))
-    
+
     # Build the highlighted text using Rich
     rich_text = Text()
     last_end = 0
-    
+
     # Sort positions to process them in order
     for start in sorted(positions.keys()):
         # Add text before this entity
         if start > last_end:
             rich_text.append(text[last_end:start])
-        
+
         # Get the entity with the longest span at this position
         entities_at_pos = sorted(positions[start], key=lambda x: x[0], reverse=True)
         end, entity_text, entity_type = entities_at_pos[0]
-        
+
         # Add the highlighted entity
         style = entity_styles.get(entity_type, "bold")
         rich_text.append(text[start:end], style=style)
-        
+
         last_end = end
-    
+
     # Add any remaining text
     if last_end < len(text):
         rich_text.append(text[last_end:])
-    
+
     # Create a panel with the highlighted text
     panel = Panel(rich_text, title="Highlighted Text", expand=False)
-    
+
     # Create a legend table
     table = Table(title="Entity Types Legend")
     table.add_column("Entity Type")
     table.add_column("Style")
-    
+
     for entity_type, style in entity_styles.items():
         table.add_row(entity_type, Text(entity_type, style=style))
-    
+
     return console, panel, table, entity_styles
 
 
@@ -143,41 +151,42 @@ def process_example(model, example, entity_types):
     """Process a single example and extract entities."""
     console = Console()
     console.print(f"\n[bold]Example {example['id']}: {example['description']}[/bold]")
-    
+
     # Get predictions, handling long texts appropriately
     entities = process_long_text(model, example["text"], entity_types)
-    
+
     # Display highlighted text using Rich
-    console, panel, legend, entity_styles = highlight_entities_in_text(example["text"], entities)
-    
+    console, panel, legend, entity_styles = highlight_entities_in_text(
+        example["text"], entities
+    )
+
     # Print the panel with highlighted text
     console.print(panel)
-    
+
     # Print the legend
     console.print(legend)
-    
+
     # Display entity list with rich formatting
     console.print("\n[bold]Extracted entities:[/bold]")
-    
+
     # Group entities by type for better organization
     entities_by_type = defaultdict(list)
     for entity in entities:
         entities_by_type[entity["label"]].append(entity["text"])
-    
+
     # Create a table for entities
     entity_table = Table(show_header=True)
     entity_table.add_column("Entity Type")
     entity_table.add_column("Entities")
-    
+
     for entity_type, entity_texts in sorted(entities_by_type.items()):
         style = entity_styles.get(entity_type, "bold")
         entity_table.add_row(
-            Text(entity_type, style=style),
-            Text(", ".join(entity_texts))
+            Text(entity_type, style=style), Text(", ".join(entity_texts))
         )
-    
+
     console.print(entity_table)
-    
+
     return entities
 
 
@@ -194,7 +203,7 @@ def main():
 
     # Load the multilingual model
     print("Loading GLiNER model...")
-    model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
+    model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1", max_length=512)
 
     # Load examples from JSON file
     examples, entity_types = load_examples(args.file)
@@ -232,31 +241,41 @@ def main():
         summary_table.add_column("Entity Type")
         summary_table.add_column("Count")
         summary_table.add_column("Percentage", justify="right")
-        
+
         # Available rich styles for highlighting
         styles = [
-            "bold red", "bold blue", "bold green", "bold yellow", 
-            "bold magenta", "bold cyan", "bold purple", "bold white on red",
-            "bold white on blue", "bold white on green", "bold white on magenta"
+            "bold red",
+            "bold blue",
+            "bold green",
+            "bold yellow",
+            "bold magenta",
+            "bold cyan",
+            "bold purple",
+            "bold white on red",
+            "bold white on blue",
+            "bold white on green",
+            "bold white on magenta",
         ]
-        
+
         # Assign styles to entity types
         entity_styles = {}
         for i, entity_type in enumerate(sorted(entity_counts.keys())):
             entity_styles[entity_type] = styles[i % len(styles)]
-        
+
         # Calculate total for percentage
         total_entities = len(all_entities)
-        
+
         # Add rows to the table
-        for entity_type, count in sorted(entity_counts.items(), key=lambda x: x[1], reverse=True):
+        for entity_type, count in sorted(
+            entity_counts.items(), key=lambda x: x[1], reverse=True
+        ):
             percentage = (count / total_entities) * 100
             summary_table.add_row(
                 Text(entity_type, style=entity_styles[entity_type]),
                 str(count),
-                f"{percentage:.1f}%"
+                f"{percentage:.1f}%",
             )
-        
+
         console.print(summary_table)
 
 
