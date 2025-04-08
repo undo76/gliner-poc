@@ -3,6 +3,8 @@
 
 import argparse
 import json
+import re
+from collections import defaultdict
 
 from gliner import GLiNER
 
@@ -60,23 +62,78 @@ def process_long_text(model, text, entity_types, chunk_size=512, overlap=100):
     return all_entities
 
 
+def highlight_entities_in_text(text, entities):
+    """Highlight entities in text using ANSI color codes."""
+    # Define colors for different entity types
+    colors = {
+        "person": "\033[1;31m",      # Bold Red
+        "organization": "\033[1;34m", # Bold Blue
+        "location": "\033[1;32m",     # Bold Green
+        "date": "\033[1;33m",         # Bold Yellow
+        "product": "\033[1;35m",      # Bold Magenta
+        "event": "\033[1;36m",        # Bold Cyan
+        "award": "\033[1;95m",        # Bold Light Magenta
+    }
+    reset = "\033[0m"  # Reset color
+    
+    # Sort entities by their position in the text (to handle overlapping entities)
+    # We'll use a defaultdict to store entities by their starting positions
+    positions = defaultdict(list)
+    
+    # Find all occurrences of each entity in the text
+    for entity in entities:
+        entity_text = entity["text"]
+        entity_type = entity["label"]
+        
+        # Find all occurrences of this entity in the text
+        for match in re.finditer(re.escape(entity_text), text):
+            start, end = match.span()
+            positions[start].append((end, entity_text, entity_type))
+    
+    # Build the highlighted text
+    result = []
+    last_end = 0
+    
+    # Sort positions to process them in order
+    for start in sorted(positions.keys()):
+        # Add text before this entity
+        if start > last_end:
+            result.append(text[last_end:start])
+        
+        # Get the entity with the longest span at this position
+        entities_at_pos = sorted(positions[start], key=lambda x: x[0], reverse=True)
+        end, entity_text, entity_type = entities_at_pos[0]
+        
+        # Add the highlighted entity
+        color = colors.get(entity_type, "\033[1m")  # Default to bold if type not found
+        result.append(f"{color}{text[start:end]}{reset}")
+        
+        last_end = end
+    
+    # Add any remaining text
+    if last_end < len(text):
+        result.append(text[last_end:])
+    
+    return "".join(result)
+
+
 def process_example(model, example, entity_types):
     """Process a single example and extract entities."""
     print(f"\n--- Example {example['id']}: {example['description']} ---")
-    print(
-        f"Text: {example['text'][:100]}..."
-        if len(example["text"]) > 100
-        else f"Text: {example['text']}"
-    )
-
+    
     # Get predictions, handling long texts appropriately
     entities = process_long_text(model, example["text"], entity_types)
-
-    # Display results
-    print("Extracted entities:")
+    
+    # Display highlighted text
+    highlighted_text = highlight_entities_in_text(example["text"], entities)
+    print("\nHighlighted Text:")
+    print(highlighted_text)
+    
+    # Display entity list
+    print("\nExtracted entities:")
     for entity in entities:
         print(f"  {entity['text']} => {entity['label']}")
-
+    
     return entities
 
 
@@ -125,9 +182,27 @@ def main():
             entity_type = entity["label"]
             entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
-        print("Entities by type:")
+        # Display color legend
+        colors = {
+            "person": "\033[1;31m",      # Bold Red
+            "organization": "\033[1;34m", # Bold Blue
+            "location": "\033[1;32m",     # Bold Green
+            "date": "\033[1;33m",         # Bold Yellow
+            "product": "\033[1;35m",      # Bold Magenta
+            "event": "\033[1;36m",        # Bold Cyan
+            "award": "\033[1;95m",        # Bold Light Magenta
+        }
+        reset = "\033[0m"  # Reset color
+        
+        print("\nColor Legend:")
+        for entity_type in sorted(entity_counts.keys()):
+            color = colors.get(entity_type, "\033[1m")
+            print(f"  {color}{entity_type}{reset}")
+        
+        print("\nEntities by type:")
         for entity_type, count in sorted(entity_counts.items()):
-            print(f"  {entity_type}: {count}")
+            color = colors.get(entity_type, "\033[1m")
+            print(f"  {color}{entity_type}{reset}: {count}")
 
 
 if __name__ == "__main__":
