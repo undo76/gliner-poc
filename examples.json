@@ -24,6 +24,11 @@
       "id": 5,
       "text": "Amazon.com was founded by Jeff Bezos on July 5, 1994. The company started as an online bookstore but has expanded to sell almost everything. Its headquarters are in Seattle, Washington.",
       "description": "E-commerce company"
+    },
+    {
+      "id": 6,
+      "text": "The 2024 Summer Olympics, officially the Games of the XXXIII Olympiad, is scheduled to take place from July 26 to August 11, 2024, in Paris, France. The city was selected as the host in September 2017 at the 131st IOC Session in Lima, Peru. The Games will mark Paris's third time hosting the Olympics (1900 and 1924), making it the second city (after London) to host the Games three times. The event will feature 32 sports across 329 events, with breaking (breakdancing) making its Olympic debut. The Games will use 35 venues, including iconic locations like the Eiffel Tower for beach volleyball and the Palace of Versailles for equestrian events. Tony Estanguet, a three-time Olympic champion in canoe slalom, serves as the President of the Paris 2024 Organizing Committee. The Olympic Village, located in Saint-Denis, will house approximately 14,500 athletes and officials. The Paralympics will follow from August 28 to September 8, 2024. The mascots for the Games are Phryges, anthropomorphic Phrygian caps colored in the French tricolor of blue, white, and red, symbolizing freedom and the French Revolution.",
+      "description": "Major sporting event"
     }
   ],
   "entity_types": [
