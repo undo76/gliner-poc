@@ -163,8 +163,8 @@ def process_example(model, example, entity_types):
     # Print the panel with highlighted text
     console.print(panel)
 
-    # Print the legend
-    console.print(legend)
+    # Print the legend (Skipping for now)
+    # console.print(legend)
 
     # Display entity list with rich formatting
     console.print("\n[bold]Extracted entities:[/bold]")
@@ -207,7 +207,7 @@ def main():
     # Suppress specific warning about sentencepiece tokenizer
     warnings.filterwarnings("ignore", message="The sentencepiece tokenizer.*")
 
-    model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1", max_length=512)
+    model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
 
     # Load examples from JSON file
     examples, entity_types = load_examples(args.file)

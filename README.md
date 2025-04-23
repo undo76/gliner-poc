@@ -6,6 +6,8 @@ A proof-of-concept application that demonstrates how to use GLiNER for Named Ent
 
 This tool uses the GLiNER multilingual model to identify and extract named entities from text. It processes examples from a JSON file and highlights different entity types with distinct colors for easy visualization.
 
+![Example](example.png)
+
 ## Features
 
 - Process single or multiple text examples
@@ -73,6 +75,7 @@ The examples file should be a JSON file with the following structure:
 ## Output
 
 The tool provides:
+
 - Highlighted text with color-coded entities
 - A legend showing entity types and their corresponding colors
 - A table of extracted entities grouped by type

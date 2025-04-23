@@ -42,6 +42,7 @@
     "location",
     "date",
     "product",
-    "event"
+    "event",
+    "landmark"
   ]
 }
